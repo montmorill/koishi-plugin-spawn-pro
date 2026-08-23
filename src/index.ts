@@ -36,7 +36,7 @@ export interface State {
   cwd: string
 }
 
-export const name = 'spawn'
+export const name = 'spawn-pro'
 
 export function apply(ctx: Context, config: Config) {
   ctx.i18n.define('en-US', enUS)
