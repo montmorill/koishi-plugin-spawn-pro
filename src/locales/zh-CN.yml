@@ -1,0 +1,14 @@
+commands:
+  exec:
+    description: 执行命令
+    options:
+      stream: 启用流式输出
+      encoding: 指定编码方式
+    messages:
+      expect-input: 请输入要运行的命令。
+      started: |-
+        开始执行 {command}
+      chunk: "{chunk}"
+      finished: |-
+        {#if !stream}{output}{/if}
+        执行结束，耗时 {timeUsed/1000} 秒，返回值 {code}

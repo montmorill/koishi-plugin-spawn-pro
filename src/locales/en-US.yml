@@ -1,0 +1,14 @@
+commands:
+  exec:
+    description: Execute command
+    options:
+      stream: Enable stream output
+      encoding: Specify the encoding method
+    messages:
+      expect-input: Please enter the command to run.
+      started: |-
+        Start executing {command}
+      chunk: "{chunk}"
+      finished: |-
+        {#if !stream}{output}{/if}
+        Process exited after {timeUsed} seconds with return value {code}
