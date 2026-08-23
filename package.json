@@ -1,18 +1,18 @@
 {
-  "name": "koishi-plugin-spawn",
-  "description": "Run shell commands with Koishi",
-  "version": "0.0.1",
-  "main": "lib/index.js",
+  "name": "koishi-plugin-spawn-pro",
+  "version": "1.0.0",
+  "description": "Run shell commands and stream the output.",
   "typings": "lib/index.d.ts",
-  "files": [
-    "lib",
-    "dist"
-  ],
   "license": "MIT",
   "keywords": [
     "chatbot",
     "koishi",
     "plugin"
+  ],
+  "main": "lib/index.js",
+  "files": [
+    "dist",
+    "lib"
   ],
   "peerDependencies": {
     "koishi": "^4.18.7"

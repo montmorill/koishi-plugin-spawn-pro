@@ -1,8 +1,11 @@
-import { exec } from 'child_process'
-import { Time } from 'cosmokit'
-import { Context, h, Schema } from 'koishi'
+import type { Context } from 'koishi'
+import type { Buffer } from 'node:buffer'
+import { exec } from 'node:child_process'
+import path from 'node:path'
 import iconv from 'iconv-lite'
-import path from 'path'
+import { h, Schema, Time } from 'koishi'
+import enUS from './locales/en-US.yml'
+import zhCN from './locales/zh-CN.yml'
 
 const encodings = ['utf8', 'utf16le', 'latin1', 'ucs2', 'gbk'] as const
 
@@ -36,8 +39,8 @@ export interface State {
 export const name = 'spawn'
 
 export function apply(ctx: Context, config: Config) {
-  ctx.i18n.define('en-US', require('./locales/en-US'))
-  ctx.i18n.define('zh-CN', require('./locales/zh-CN'))
+  ctx.i18n.define('en-US', enUS)
+  ctx.i18n.define('zh-CN', zhCN)
 
   const command = ctx.command('exec <command:rawtext>', { authority: 4 })
     .option('stream', '-s')
