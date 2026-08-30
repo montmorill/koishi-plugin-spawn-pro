@@ -2,6 +2,7 @@ import type { Context } from 'koishi'
 import type { Buffer } from 'node:buffer'
 import { exec } from 'node:child_process'
 import path from 'node:path'
+import { stripVTControlCharacters } from 'node:util'
 import iconv from 'iconv-lite'
 import { h, Schema, Time } from 'koishi'
 import enUS from './locales/en-US.yml'
@@ -72,6 +73,8 @@ export function apply(ctx: Context, config: Config) {
 
     const onData = (fd: 'stdout' | 'stderr') => (buffer: Buffer) => {
       let chunk = iconv.decode(buffer, encoding)
+      chunk = stripVTControlCharacters(chunk)
+      // TODO: support color
       chunk = session.text('.chunk', { chunk, fd })
       state.output += chunk
       stream && sendQueued(h('stream', chunk))
