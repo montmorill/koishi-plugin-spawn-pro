@@ -11,4 +11,4 @@ commands:
       chunk: "{chunk}"
       finished: |-
         {#if !stream}{output}{/if}
-        执行结束，耗时 {timeUsed/1000} 秒，返回值 {code}
+        {#if verbose}执行结束，耗时 {timeUsed/1000} 秒，返回值 {code}{/if}

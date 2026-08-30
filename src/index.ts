@@ -9,30 +9,29 @@ import enUS from './locales/en-US.yml'
 import zhCN from './locales/zh-CN.yml'
 
 export interface Config {
-  root: string
+  cwd: string
   shell?: string
   encoding: string
   timeout: number
   stream: boolean
+  verbose: boolean
 }
 
 export const Config: Schema<Config> = Schema.object({
-  root: Schema.string().description('工作路径。').default(''),
+  cwd: Schema.string().description('工作路径。').default(''),
   shell: Schema.string().description('运行命令的程序。'),
   encoding: Schema.string().description('输出内容编码。').default('utf8'),
   timeout: Schema.number().description('最长运行时间。').default(Time.minute),
-  stream: Schema.boolean().description('默认使用流式输出。').default(false),
+  stream: Schema.boolean().description('使用流式输出。').default(false),
+  verbose: Schema.boolean().description('输出详细信息。').default(false),
 })
 
-export interface State {
-  stream: boolean
+export interface State extends Config {
   command: string
-  timeout: number
   output: string
   code?: number | null
   signal?: NodeJS.Signals | null
   timeUsed?: number
-  cwd: string
 }
 
 export const name = 'spawn-pro'
@@ -42,8 +41,9 @@ export function apply(ctx: Context, config: Config) {
   ctx.i18n.define('zh-CN', zhCN)
 
   const command = ctx.command('exec <command:rawtext>', { authority: 4 })
-    .option('stream', '-s')
     .option('encoding', '--encoding <encoding>')
+    .option('stream', '-s')
+    .option('verbose', '-v')
 
   for (const encoding of ['utf8', 'utf16le', 'latin1', 'ucs2', 'gbk'])
     command.option('encoding', `--encoding-${encoding}`, { value: encoding })
@@ -52,30 +52,37 @@ export function apply(ctx: Context, config: Config) {
     if (!session)
       return
 
-    const stream = options?.stream === undefined ? config.stream : options.stream
-    const { root, shell, encoding, timeout } = Object.assign({}, config, options)
-    const cwd = path.resolve(ctx.baseDir, root)
+    const state: State = Object.assign(config, options, {
+      command,
+      output: '',
+      cwd: path.resolve(ctx.baseDir, config.cwd),
+    })
 
-    const state: State = { stream, command, timeout, output: '', cwd }
     let elements = session.i18n('.started', state)
-    if (stream)
+    if (state.stream)
       elements = [h('stream', ...elements, h('br'))]
-    await session.send(elements)
+    state.verbose && await session.send(elements)
 
     let lastPromise = Promise.resolve([] as string[])
     const sendQueued = (fragment: h.Fragment): Promise<string[]> =>
       (lastPromise = lastPromise.then(() => session.send(fragment)))
 
     const start = Date.now()
-    const child = exec(command, { timeout, cwd, encoding: 'buffer', shell, windowsHide: true })
+    const child = exec(command, {
+      cwd: state.cwd,
+      windowsHide: true,
+      timeout: state.timeout,
+      shell: state.shell,
+      encoding: 'buffer',
+    })
 
     const onData = (fd: 'stdout' | 'stderr') => (buffer: Buffer) => {
-      let chunk = iconv.decode(buffer, encoding)
+      let chunk = iconv.decode(buffer, state.encoding)
       chunk = stripVTControlCharacters(chunk)
       // TODO: support color
       chunk = session.text('.chunk', { chunk, fd })
       state.output += chunk
-      stream && sendQueued(h('stream', chunk))
+      state.stream && sendQueued(h('stream', chunk))
     }
     child.stdout?.on('data', onData('stdout'))
     child.stderr?.on('data', onData('stderr'))
@@ -85,7 +92,7 @@ export function apply(ctx: Context, config: Config) {
         state.signal = signal
         state.timeUsed = Date.now() - start
         let elements = session.i18n('.finished', state)
-        if (stream)
+        if (state.stream)
           elements = [h('stream', { done: true }, h('br'), ...elements)]
         sendQueued(elements).then(resolve)
       })
