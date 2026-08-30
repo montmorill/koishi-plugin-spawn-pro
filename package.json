@@ -1,6 +1,6 @@
 {
   "name": "koishi-plugin-spawn-pro",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Run shell commands and stream the output.",
   "typings": "lib/index.d.ts",
   "license": "MIT",

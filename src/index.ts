@@ -44,13 +44,18 @@ export function apply(ctx: Context, config: Config) {
     .option('encoding', '--encoding <encoding>')
     .option('stream', '-s')
     .option('verbose', '-v')
+    .option('stdout', '-1')
+    .option('stderr', '-2')
 
   for (const encoding of ['utf8', 'utf16le', 'latin1', 'ucs2', 'gbk'])
     command.option('encoding', `--encoding-${encoding}`, { value: encoding })
 
-  command.action(async ({ session, options }, command) => {
+  command.action(async ({ session, options = {} }, command) => {
     if (!session)
       return
+
+    if (!('stdout' in options) && !('stderr' in options))
+      options.stdout = options.stderr = true
 
     const state: State = Object.assign(config, options, {
       command,
@@ -84,8 +89,8 @@ export function apply(ctx: Context, config: Config) {
       state.output += chunk
       state.stream && sendQueued(h('stream', chunk))
     }
-    child.stdout?.on('data', onData('stdout'))
-    child.stderr?.on('data', onData('stderr'))
+    options.stdout && child.stdout?.on('data', onData('stdout'))
+    options.stderr && child.stderr?.on('data', onData('stderr'))
     await new Promise((resolve) => {
       child.on('close', (code, signal) => {
         state.code = code
