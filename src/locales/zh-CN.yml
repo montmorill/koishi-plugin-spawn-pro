@@ -8,7 +8,7 @@ commands:
       expect-input: 请输入要运行的命令。
       started: |-
         开始执行 {command}
-      chunk: "{chunk}"
+      chunk: "{content}"
       finished: |-
         {#if !stream}{output}{/if}
         {#if verbose}执行结束，耗时 {timeUsed/1000} 秒，返回值 {code}{/if}

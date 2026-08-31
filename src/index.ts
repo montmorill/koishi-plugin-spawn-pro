@@ -82,12 +82,12 @@ export function apply(ctx: Context, config: Config) {
     })
 
     const onData = (fd: 'stdout' | 'stderr') => (buffer: Buffer) => {
-      let chunk = iconv.decode(buffer, state.encoding)
-      chunk = stripVTControlCharacters(chunk)
+      let content = iconv.decode(buffer, state.encoding)
+      content = stripVTControlCharacters(content)
       // TODO: support color
-      chunk = session.text('.chunk', { chunk, fd })
-      state.output += chunk
-      state.stream && sendQueued(h('stream', chunk))
+      content = session.text('.chunk', { content, fd })
+      state.output += content
+      state.stream && sendQueued(h('stream', content))
     }
     options.stdout && child.stdout?.on('data', onData('stdout'))
     options.stderr && child.stderr?.on('data', onData('stderr'))

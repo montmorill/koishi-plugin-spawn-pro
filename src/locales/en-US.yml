@@ -8,7 +8,7 @@ commands:
       expect-input: Please enter the command to run.
       started: |-
         Start executing {command}
-      chunk: "{chunk}"
+      chunk: "{content}"
       finished: |-
         {#if !stream}{output}{/if}
         {#if verbose}Process exited after {timeUsed} seconds with return value {code}{/if}
