@@ -47,9 +47,6 @@ export function apply(ctx: Context, config: Config) {
     .option('stdout', '-1')
     .option('stderr', '-2')
 
-  for (const encoding of ['utf8', 'utf16le', 'latin1', 'ucs2', 'gbk'])
-    command.option('encoding', `--encoding-${encoding}`, { value: encoding })
-
   command.action(async ({ session, options = {} }, command) => {
     if (!session)
       return
@@ -57,7 +54,7 @@ export function apply(ctx: Context, config: Config) {
     if (!('stdout' in options) && !('stderr' in options))
       options.stdout = options.stderr = true
 
-    const state: State = Object.assign(config, options, {
+    const state: State = Object.assign({}, config, options, {
       command,
       output: '',
       cwd: path.resolve(ctx.baseDir, config.cwd),
